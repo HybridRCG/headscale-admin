@@ -1,3 +1,17 @@
+# headscale-admin (HybridRCG Fork)
+
+> **This is a fork of [headscale-admin](https://github.com/GoodiesHQ/headscale-admin) by GoodiesHQ, licensed under GPL v3.**
+> 
+> Modifications by HybridRCG:
+> - Updated for Headscale v0.28 API compatibility
+> - Fixed pre-auth key handling (single API call)
+> - Fixed node expand/collapse
+> - Full pre-auth key display at creation time
+> - Fixed pre-auth key expire endpoint
+> - Version 0.28.1
+
+---
+
 # headscale-admin
 
 headscale-admin is meant to be a simple, modern, and useful web interface for [juanfont/headscale](https://github.com/juanfont/headscale) - *"An open source, self-hosted implementation of the Tailscale control server."*
