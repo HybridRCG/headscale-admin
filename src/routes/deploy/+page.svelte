@@ -130,7 +130,7 @@
 								>{App.preAuthKeys.value.filter(createFilter(deployment.preAuthKeyUser)).length} Valid Key(s)</option
 							>
 							{#each App.preAuthKeys.value.filter(createFilter(deployment.preAuthKeyUser)) as preAuthKey}
-								<option value={preAuthKey.key}>{preAuthKey.key}</option>
+									<option value={App.fullKeyMap.get(preAuthKey.id) ?? preAuthKey.key}>{App.fullKeyMap.has(preAuthKey.id) ? '✅ ' : '🔒 '}{preAuthKey.key}</option>
 							{/each}
 						</select>
 					</div>

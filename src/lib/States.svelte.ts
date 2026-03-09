@@ -105,6 +105,7 @@ export class HeadscaleAdmin {
     nodes = new State<Node[]>([]);
     // routes = new State<Route[]>([]);
     preAuthKeys = new State<PreAuthKey[]>([]);
+    fullKeyMap = new Map<string, string>(); // id -> full key at creation time
 
     // debugging status
     debug = new StateLocal<boolean>('debug', false);
@@ -221,9 +222,11 @@ export class HeadscaleAdmin {
 
     async populateApiKeyInfo(): Promise<boolean> {
         const { apiKeys } = await apiGet<ApiApiKeys>(`/api/v1/apikey`);
-        const myKey = apiKeys.filter((key) => this.apiKey.value.startsWith(key.prefix))[0];
-        const apiKeyInfo = this.apiKeyInfo.value
-        apiKeyInfo.expires = myKey.expiration;
+        const myKey = (apiKeys ?? []).filter((key) => this.apiKey.value.startsWith(key.prefix))[0];
+        const apiKeyInfo = this.apiKeyInfo.value;
+        if (myKey) {
+            apiKeyInfo.expires = myKey.expiration ?? myKey.expiry;
+        }
         apiKeyInfo.authorized = true;
         this.apiKeyInfo.value = {...apiKeyInfo};
         return true;

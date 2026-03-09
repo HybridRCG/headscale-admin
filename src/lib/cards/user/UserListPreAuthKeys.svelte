@@ -26,6 +26,8 @@
 	let disableCreate = $state(false);
 	let checked = $state(defaultChecked());
 	let expires = $state(defaultExpires());
+	let newKeyFull = $state('');
+	let showNewKey = $state(false);
 	const preAuthKeys = $derived(
 		App.preAuthKeys.value.filter((p) => {
 			return (p.user.id === user.id) 
@@ -95,7 +97,10 @@
 										checked.reusable,
 										expires,
 									);
-									App.preAuthKeys.value.push(preAuthKey)
+									App.preAuthKeys.value.push(preAuthKey);
+									App.fullKeyMap.set(preAuthKey.id, preAuthKey.key);
+									newKeyFull = preAuthKey.key;
+									showNewKey = true;
 								} catch (e) {
 									debug(e);
 								} finally {
@@ -149,6 +154,15 @@
 	</div>
 	{#snippet childBottom()}
 		<div class="grid grid-cols-12 col-span-12 pt-4">
+			{#if showNewKey}
+				<div class="col-span-12 p-3 mb-2 rounded-md variant-filled-success">
+					<p class="text-xs font-bold mb-1">⚠️ Copy your key now — it won't be shown again!</p>
+					<div class="flex items-center gap-2">
+						<code class="text-xs break-all flex-1">{newKeyFull}</code>
+						<button class="btn btn-sm variant-filled" onclick={() => { navigator.clipboard.writeText(newKeyFull); showNewKey = false; }}>Copy & Close</button>
+					</div>
+				</div>
+			{/if}
 			{#each preAuthKeys as preAuthKey}
 				<CardSeparator />
 				<UserListPreAuthKey {preAuthKey} />

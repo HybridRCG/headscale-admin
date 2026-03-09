@@ -18,9 +18,9 @@
 		node = $bindable(),
 	}: NodeTagsProps = $props()
 
-	const tagsForced = $derived(node.forcedTags.map((tag) => tag.replace('tag:', '')));
-	const tagsValid = $derived(node.validTags.map((tag) => tag.replace('tag:', '')));
-	const tagsInvalid = $derived(node.invalidTags.map((tag) => tag.replace('tag:', '')));
+	const tagsForced = $derived((node.forcedTags ?? []).map((tag) => tag.replace('tag:', '')));
+	const tagsValid = $derived((node.validTags ?? []).map((tag) => tag.replace('tag:', '')));
+	const tagsInvalid = $derived((node.invalidTags ?? []).map((tag) => tag.replace('tag:', '')));
 
 	let disabled = $state(false);
 	let popupInvalidTagsShow = $state(false);

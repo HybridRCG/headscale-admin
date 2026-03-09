@@ -76,21 +76,20 @@ export type ApiPreAuthKey = {
 	preAuthKey: PreAuthKey;
 };
 
-export class PreAuthKey {
-	constructor(
-		public user: User,
-		public id: string,
-		public key: string,
-		public reusable: boolean,
-		public ephemeral: boolean,
-		public used: boolean,
-		public expiration: string,
-		public createdAt: string,
-		public aclTags: string[],
-	) { }
-	isExpired: () => boolean = () => {
-		return new Date() > new Date(this.expiration);
-	};
+export type PreAuthKey = {
+	user: User;
+	id: string;
+	key: string;
+	reusable: boolean;
+	ephemeral: boolean;
+	used: boolean;
+	expiration: string;
+	createdAt: string;
+	aclTags: string[];
+}
+
+export function isPreAuthKeyExpired(key: PreAuthKey): boolean {
+	return new Date() > new Date(key.expiration);
 }
 
 export class PreAuthKeys {
