@@ -23,16 +23,18 @@
 		loading = $bindable(false),
 	}: NodeRouteProps = $props()
 
-	const approved = $derived(node.approvedRoutes.includes(route));
-	const available = $derived(node.availableRoutes.includes(route));
-	const subnet = $derived(node.subnetRoutes.includes(route));
+        const liveNode = $derived(App.nodes.value.find(n => n.id === node.id) ?? node);
+	const approved = $derived(liveNode.approvedRoutes.includes(route));
+	const available = $derived(liveNode.availableRoutes.includes(route));
+	const subnet = $derived(liveNode.subnetRoutes.includes(route));
 
 	// component is disabled
+        console.log("disabled check - disable:", disable, "loading:", loading, "route:", route, "isExpired:", isExpired(liveNode.expiry || ""));
 	const disabled = $derived(
 		disable || // disabled by parent
 		loading || // route status is actively being changed
 		!route || // route is not advertised
-		isExpired(node.expiry || '') /* || // node is expired
+		isExpired(liveNode.expiry || '') /* || // node is expired
 		!node.online; // node is not online */
 	)
 </script>
@@ -51,9 +53,9 @@
 			loading = true;
 			try {
 				if (approved) {
-					await disableRoutes(node, route);
+					await disableRoutes(liveNode, route);
 				} else {
-					await enableRoutes(node, route);
+					await enableRoutes(liveNode, route);
 				}
 			} catch (error) {
 				debug(error);

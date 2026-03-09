@@ -57,7 +57,7 @@
 
 	<Outer>
 		{#each nodesSortedFiltered as node}
-			<Inner {node} />
+			<Inner node={App.nodes.value.find(n => n.id === node.id) ?? node} />
 		{/each}
 	</Outer>
 </Page>

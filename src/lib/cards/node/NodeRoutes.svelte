@@ -22,6 +22,7 @@
 	}: NodeRoutesProps = $props()
 
 	let loading = $state(false);
+        const liveNode = $derived(App.nodes.value.find(n => n.id === node.id) ?? node);
 
 </script>
 
@@ -33,7 +34,7 @@
 			onclick={async () => {
 				loading = true
 				try {
-					await enableRoutes(node, ...node.availableRoutes);
+					await enableRoutes(liveNode, ...liveNode.availableRoutes);
 				} catch (error) {
 					debug(error);
 				} finally {
@@ -49,7 +50,7 @@
 			onclick={async () => {
 				loading = true
 				try {
-					await disableRoutes(node, ...node.availableRoutes);
+					await disableRoutes(liveNode, ...liveNode.availableRoutes);
 				} catch (error) {
 					debug(error);
 				} finally {
@@ -61,9 +62,9 @@
 		</button>
 	</div>
 	{#if childBottom === undefined}
-		{#each node.availableRoutes as route}
+		{#each liveNode.availableRoutes as route}
 			<div class="grid grid-cols-12 col-span-12 font-thin">
-				<NodeRoute {route} disable={loading} {node} />
+				<NodeRoute {route} disable={loading} node={liveNode} />
 			</div>
 		{/each}
 	{:else}

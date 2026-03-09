@@ -62,9 +62,7 @@ export async function enableRoutes(node: Node, ...routes: string[]): Promise<str
 	const currentRoutes = new Set(node.approvedRoutes);
 	const newRoutes = new Set(node.approvedRoutes.concat(routes));
 
-	if (setsEqual(currentRoutes, newRoutes)) {
-		return node.approvedRoutes; // No change needed
-	}
+	// DISABLED: if (setsEqual(currentRoutes, newRoutes)) { return node.approvedRoutes; }
 
 	// fix headscale bug #2637
 	const currentStatus = node.online;
@@ -81,9 +79,7 @@ export async function disableRoutes(node: Node, ...routes: string[]): Promise<st
 	const currentRoutes = new Set(node.approvedRoutes);
 	const newRoutes = new Set(node.approvedRoutes.filter((r) => !routes.includes(r)));
 
-	if (setsEqual(currentRoutes, newRoutes)) {
-		return node.approvedRoutes; // No change needed
-	}
+	// DISABLED: if (setsEqual(currentRoutes, newRoutes)) { return node.approvedRoutes; }
 
 	// fix headscale bug #2637
 	const currentStatus = node.online;
