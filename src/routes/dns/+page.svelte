@@ -5,7 +5,7 @@
 	import { toastSuccess } from '$lib/common/funcs';
 	import { debug } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
-	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	import RawMdiDns from '~icons/mdi/dns';
 	import RawMdiDelete from '~icons/mdi/delete-outline';
@@ -16,10 +16,8 @@
 
 	const ToastStore = getToastStore();
 
-	// Config API settings - stored in localStorage
-	let configApiUrl = $state(localStorage.getItem('configApiUrl') || (page.url.origin + '/config-api'));
-	let configApiKey = $state(localStorage.getItem('configApiKey') || '');
-	let configApiKeyShow = $state(false);
+	const configApiUrl = '/config-api';
+	const configApiKey = 'hs-config-api-k3y-2026!';
 
 	type DnsConfig = {
 		magic_dns: boolean;
@@ -36,6 +34,7 @@
 	let dns = $state<DnsConfig | null>(null);
 	let loading = $state(false);
 	let loadError = $state('');
+	onMount(() => { loadDns(); });
 
 	// Form state
 	let newBaseDomain = $state('');
@@ -68,8 +67,6 @@
 		loading = true;
 		loadError = '';
 		try {
-			localStorage.setItem('configApiUrl', configApiUrl);
-			localStorage.setItem('configApiKey', configApiKey);
 			dns = await apiCall('/dns');
 			newBaseDomain = dns?.base_domain || '';
 		} catch (e: any) {
@@ -195,34 +192,10 @@
 
 <Page classes="items-start">
 	<PageHeader title="DNS" />
+	{#if loadError}
+		<div class="w-full max-w-4xl mx-auto mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg text-sm">{loadError}</div>
+	{/if}
 
-	<!-- Config API Connection -->
-	<div class="w-full max-w-4xl mx-auto mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-		<h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Config API Connection</h3>
-		<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-			<div class="flex-1">
-				<label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">API URL</label>
-				<input class="w-full rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm"
-					type="text" bind:value={configApiUrl} placeholder="https://hs.groblers.co.uk/config-api" />
-			</div>
-			<div class="flex-1">
-				<label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">API Key</label>
-				<div class="flex gap-2">
-					<input class="flex-1 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm"
-						type={configApiKeyShow ? 'text' : 'password'} bind:value={configApiKey} placeholder="API Key" />
-					<button class="btn btn-sm variant-ghost" onclick={() => configApiKeyShow = !configApiKeyShow}>
-						{configApiKeyShow ? '🙈' : '👁'}
-					</button>
-				</div>
-			</div>
-			<button class="btn btn-sm variant-filled-primary flex items-center gap-1" onclick={loadDns} disabled={loading}>
-				<RawMdiRefresh class={loading ? 'animate-spin' : ''} /> Load
-			</button>
-		</div>
-		{#if loadError}
-			<p class="mt-2 text-sm text-red-500">{loadError}</p>
-		{/if}
-	</div>
 
 	{#if dns}
 	<div class="w-full max-w-4xl mx-auto space-y-6">
