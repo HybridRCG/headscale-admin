@@ -9,6 +9,7 @@
 	import RawMdiRouter from '~icons/mdi/router';
 	import RawMdiSecurity from '~icons/mdi/security';
 	import RawMdiSettings from '~icons/mdi/settings';
+import RawMdiDns from '~icons/mdi/dns';
 
 	// import { ApiKeyInfoStore, ApiKeyStore, hasValidApi } from './Stores';
 	import { onMount, type Component } from 'svelte';
@@ -48,6 +49,7 @@
 		{ path: '/deploy', name: 'Deploy', logo: RawMdiHomeGroupPlus },
 		{ path: '/routes', name: 'Routes', logo: RawMdiRouter },
 		{ path: '/acls', name: 'ACLs', logo: RawMdiSecurity },
+		{ path: '/dns', name: 'DNS', logo: RawMdiDns },
 		{ path: '/settings', name: 'Settings', logo: RawMdiSettings },
 	].filter((p) => p != undefined);
 
