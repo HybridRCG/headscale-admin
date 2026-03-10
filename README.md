@@ -1,14 +1,21 @@
 # headscale-admin (HybridRCG Fork)
 
 > **This is a fork of [headscale-admin](https://github.com/GoodiesHQ/headscale-admin) by GoodiesHQ, licensed under GPL v3.**
-> 
+>
+> Fork maintained by [HybridRCG](https://github.com/HybridRCG/headscale-admin)
+>
 > Modifications by HybridRCG:
 > - Updated for Headscale v0.28 API compatibility
-> - Fixed pre-auth key handling (single API call)
-> - Fixed node expand/collapse
+> - Fixed pre-auth key handling (single API call, correct endpoint)
+> - Fixed pre-auth key expire endpoint (uses `id` not `key`)
+> - Fixed node expand/collapse behaviour
 > - Full pre-auth key display at creation time
-> - Fixed pre-auth key expire endpoint
-> - Version 0.28.1
+> - Route toggle reactivity — live node state via derived lookup
+> - Version number dynamically read from package.json
+> - Added DNS tab — full DNS management via headscale-config-api backend
+> - Added headscale-config-api companion service (Python FastAPI)
+> - Headplane and original goodieshq admin UI replaced by this fork
+> - Current version: v0.28.4
 
 ---
 
@@ -18,7 +25,7 @@ headscale-admin is meant to be a simple, modern, and useful web interface for [j
 
 headscale-admin is still in active development and will evolve in tandem with headscale. It should not be treated as a final product, but when used properly, it should be safe to run in a production environment.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=goodieshq/headscale-admin&type=Timeline&size=mobile)](https://star-history.com/#goodieshq/headscale-admin&Timeline)
+[![Star History Chart](https://api.star-history.com/svg?repos=HybridRCG/headscale-admin&type=Timeline&size=mobile)](https://star-history.com/#HybridRCG/headscale-admin&Timeline)
 
 ### Known Issues
 
@@ -36,23 +43,66 @@ Please note that headscale-admin is an entirely stateless application. The stati
 
 headscale-admin was built using the [Skeleton](https://github.com/skeletonlabs/skeleton) framework on top of [SvelteKit](https://svelte.dev/tutorial/kit/introducing-sveltekit) + [TailwindCSS](https://tailwindcss.com/). It uses svelte/adapter-static to produce only static files when built. They can be hosted on nearly any server or environment as they are not contingent upon any specific runtime library.
 
+### headscale-config-api Setup
+
+The `headscale-config-api` is a companion Python FastAPI service that allows the DNS tab to read and write the Headscale `config.yaml` file directly. It also triggers a Headscale container restart when DNS changes are applied.
+
+#### Build the image
+```bash
+cd headscale-config-api
+docker build -t headscale-config-api:latest .
+```
+
+#### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CONFIG_API_KEY` | Secret key to authenticate requests | required |
+| `CONFIG_PATH` | Path to headscale config.yaml inside the container | `/headscale/config.yaml` |
+| `HEADSCALE_CONTAINER` | Name of the headscale Docker container to restart | `headscale` |
+
+#### Required Mounts
+
+| Host Path | Container Path | Purpose |
+|-----------|---------------|---------|
+| `./configs/headscale/config.yaml` | `/headscale/config.yaml` | Headscale config file |
+| `/var/run/docker.sock` | `/var/run/docker.sock` | Docker socket for container restart |
+
+#### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/dns` | Read full DNS config |
+| POST | `/dns/rename` | Rename tailnet (base_domain) |
+| POST | `/dns/magic` | Toggle Magic DNS |
+| POST | `/dns/override` | Toggle Override Local DNS |
+| POST | `/dns/nameservers/add` | Add global or split nameserver |
+| POST | `/dns/nameservers/remove` | Remove nameserver |
+| POST | `/dns/search_domains/add` | Add search domain |
+| POST | `/dns/search_domains/remove` | Remove search domain |
+| POST | `/dns/records/add` | Add DNS record |
+| POST | `/dns/records/remove` | Remove DNS record |
+| GET | `/health` | Health check |
+
+> **Note:** The API key in `headscale-config-api` is hardcoded in the DNS tab of headscale-admin. If you change `CONFIG_API_KEY`, update `src/routes/dns/+page.svelte` and rebuild the admin UI.
+
 #### Endpoint
 **Note:** If you are building headscale-admin from source and want to host it on an endpoint other than the base of the domain, (e.g. `headscale.example.com/admin`) then you must set the `ENDPOINT` environment variable when building. Otherwise, it will default to expecting to be hosted on the root path "myheadscale.com/" and redirects and resource loading will not work correctly if you place them in a child folder. Once built, it is recommended to rename the `build` directory to the same name as your `$ENDPOINT` variable so the requests can follow the folder structure and not have to be stripped or rewritten by a front end proxy. The provided Dockerfile shows this in practice.
 
-The default endpoint for the [headscale-admin Docker container](https://hub.docker.com/r/goodieshq/headscale-admin) is always `/admin` as this does not clash with any URL endpoints provided by the headscale API and can safely be hosted on the same subdomain.
+The default endpoint for the [headscale-admin Docker container](https://hub.docker.com/r/HybridRCG/headscale-admin) is always `/admin` as this does not clash with any URL endpoints provided by the headscale API and can safely be hosted on the same subdomain.
 
 #### Clone the repository
 
 Clone a specific version without code history
 
 ```
-git clone --depth 1 --branch <version> https://github.com/GoodiesHQ/headscale-admin
+git clone --depth 1 --branch <version> https://github.coom/HybridRCG/headscale-admin
 ```
 
 Alternatively, you can just clone the main branch for the latest release or `git checkout <version>` for a specific version.
 
 ```
-git clone https://github.com/GoodiesHQ/headscale-admin
+git clone https://github.com/HybridRCG/headscale-admin
 ```
 
 #### Set your ENDPOINT
@@ -121,13 +171,13 @@ docker run -p 8000:80 headscale-admin
 You can also use a pre-built image:
 
 ```
-docker run -p 8000:80 goodieshq/headscale-admin:latest
+docker run -p 8000:80 HybridRCG/headscale-admin:latest
 ```
 
 #### Docker Versioning
-Due to the dynamic nature of the headscale API, starting with version `v0.24`, headscale-admin will no longer attempt to maintain compatibility with multiple version of headscale (previously there was a *"Legacy API"* option). Instead, headscale-admin versions will track the major versions of headscale itself. This means that the tag for `goodieshq/headscale-admin:0.24` of headscale-admin will be compatible with version `headscale/headscale:0.24` of headscale. Minor versions will not track headscale as there may be a need for bugfixes outside of headscale's release schedule.
+Due to the dynamic nature of the headscale API, starting with version `v0.24`, headscale-admin will no longer attempt to maintain compatibility with multiple version of headscale (previously there was a *"Legacy API"* option). Instead, headscale-admin versions will track the major versions of headscale itself. This means that the tag for `HybridRCG/headscale-admin:0.24` of headscale-admin will be compatible with version `headscale/headscale:0.24` of headscale. Minor versions will not track headscale as there may be a need for bugfixes outside of headscale's release schedule.
 
-The `goodieshq/headscale-admin:latest` tag will only be used for the latest stable release of headscale-admin that is compatible with a recent stable release of headscale. Because these are not guaranteed to track, it is recommended to explicitly tag the major version of headscale that you are using.
+The `HybridRCG/headscale-admin:latest` tag will only be used for the latest stable release of headscale-admin that is compatible with a recent stable release of headscale. Because these are not guaranteed to track, it is recommended to explicitly tag the major version of headscale that you are using.
 
 #### Docker Compose
 
@@ -169,44 +219,44 @@ Contents of `traefik/docker-compose.yml`:
 ```yaml
 services:
   traefik:
-    image: traefik:3.3
-    container_name: traefik
-    restart: unless-stopped
-    command:
-      - --providers.docker
-      - --log.level=ERROR
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80/tcp
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.myresolver.acme.dnschallenge=true
-      - --certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.myresolver.acme.email=username@email.com
-      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
-      - --serverstransport.insecureskipverify=true
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - letsencrypt:/letsencrypt
-    networks:
-      - proxy
-    env_file:
-      - ./env/cloudflare.env
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: proxy
-      traefik.http.routers.traefik.tls.certresolver: myresolver
-      traefik.http.routers.traefik.rule: Host(`traefik.exampe.com`)
-      traefik.http.middlewares.hsts-header.headers.customResponseHeaders.Strict-Transport-Security: max-age=63072000
-      traefik.http.routers.traefik.middlewares: hsts-header
-      traefik.http.routers.traefik.service: api@internal
+	image: traefik:3.3
+	container_name: traefik
+	restart: unless-stopped
+	command:
+	  - --providers.docker
+	  - --log.level=ERROR
+	  - --providers.docker=true
+	  - --providers.docker.exposedbydefault=false
+	  - --entrypoints.web.address=:80/tcp
+	  - --entrypoints.web.http.redirections.entrypoint.to=websecure
+	  - --entrypoints.web.http.redirections.entrypoint.scheme=https
+	  - --entrypoints.websecure.address=:443
+	  - --certificatesresolvers.myresolver.acme.dnschallenge=true
+	  - --certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare
+	  - --certificatesresolvers.myresolver.acme.email=username@email.com
+	  - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+	  - --serverstransport.insecureskipverify=true
+	ports:
+	  - 80:80
+	  - 443:443
+	volumes:
+	  - /var/run/docker.sock:/var/run/docker.sock:ro
+	  - letsencrypt:/letsencrypt
+	networks:
+	  - proxy
+	env_file:
+	  - ./env/cloudflare.env
+	labels:
+	  traefik.enable: "true"
+	  traefik.docker.network: proxy
+	  traefik.http.routers.traefik.tls.certresolver: myresolver
+	  traefik.http.routers.traefik.rule: Host(`traefik.exampe.com`)
+	  traefik.http.middlewares.hsts-header.headers.customResponseHeaders.Strict-Transport-Security: max-age=63072000
+	  traefik.http.routers.traefik.middlewares: hsts-header
+	  traefik.http.routers.traefik.service: api@internal
 networks:
   proxy:
-    external: true
+	external: true
 
 volumes:
   letsencrypt: {}
@@ -215,7 +265,7 @@ volumes:
 #### Certificate Resolvers
 Traefik using LetsEncrypt to automatically provision SSL certificates for your provisioned services. You may need to play with your `certresolvers` settings to get the right domain and SSL support working for you. This line in the YML file should contain the email address used for Cloudflare:
 ```yml
-      - --certificatesresolvers.myresolver.acme.email=username@email.com
+	  - --certificatesresolvers.myresolver.acme.email=username@email.com
 ```
 
 This example uses the Cloudflare API to perform DNS verification and requires a `./env/cloudflare.env` file (relative to `docker-compose.yml`) to contain something like:
@@ -241,55 +291,55 @@ And the othr will need **Zone:Read**:
 ```yml
 services:
   headscale:
-    image: headscale/headscale:0.24
-    container_name: headscale
-    restart: unless-stopped
-    environment:
-      - TZ=America/Los_Angeles
-    volumes:
-      - ./conf:/etc/headscale
-      - headscale-data:/var/lib/headscale
-    entrypoint: headscale serve
-    networks:
-      - proxy
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "proxy"
-      # Headscale Service Configuration
-      traefik.http.services.headscale.loadbalancer.server.port: 8080
-      traefik.http.services.headscale.loadbalancer.server.scheme: http
-      traefik.http.routers.headscale.rule: Host(`headscale.example.com`)
-      traefik.http.routers.headscale.entrypoints: websecure
-      traefik.http.routers.headscale.tls.certresolver: myresolver
-      traefik.http.routers.headscale.service: headscale
-      # CORS Middleware Configuration
-      traefik.http.middlewares.headscale-cors.headers.accessControlAllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
-      traefik.http.middlewares.headscale-cors.headers.accessControlAllowHeaders: "Authorization,Content-Type"
-      traefik.http.middlewares.headscale-cors.headers.accessControlAllowOriginList: "https://headscale.example.com"
-      traefik.http.middlewares.headscale-cors.headers.accessControlMaxAge: 100
-      traefik.http.middlewares.headscale-cors.headers.addVaryHeader: true
-      # Attach Middleware to Router
-      traefik.http.routers.headscale.middlewares: headscale-cors
+	image: headscale/headscale:0.28
+	container_name: headscale
+	restart: unless-stopped
+	environment:
+	  - TZ=America/Los_Angeles
+	volumes:
+	  - ./conf:/etc/headscale
+	  - headscale-data:/var/lib/headscale
+	entrypoint: headscale serve
+	networks:
+	  - proxy
+	labels:
+	  traefik.enable: "true"
+	  traefik.docker.network: "proxy"
+	  # Headscale Service Configuration
+	  traefik.http.services.headscale.loadbalancer.server.port: 8080
+	  traefik.http.services.headscale.loadbalancer.server.scheme: http
+	  traefik.http.routers.headscale.rule: Host(`headscale.example.com`)
+	  traefik.http.routers.headscale.entrypoints: websecure
+	  traefik.http.routers.headscale.tls.certresolver: myresolver
+	  traefik.http.routers.headscale.service: headscale
+	  # CORS Middleware Configuration
+	  traefik.http.middlewares.headscale-cors.headers.accessControlAllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+	  traefik.http.middlewares.headscale-cors.headers.accessControlAllowHeaders: "Authorization,Content-Type"
+	  traefik.http.middlewares.headscale-cors.headers.accessControlAllowOriginList: "https://headscale.example.com"
+	  traefik.http.middlewares.headscale-cors.headers.accessControlMaxAge: 100
+	  traefik.http.middlewares.headscale-cors.headers.addVaryHeader: true
+	  # Attach Middleware to Router
+	  traefik.http.routers.headscale.middlewares: headscale-cors
 
   headscale-admin:
-    image: goodieshq/headscale-admin:0.24
-    container_name: headscale-admin
-    restart: unless-stopped
-    networks:
-      - proxy
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "proxy"
-      # Headscale Admin Service Configuration
-      traefik.http.services.headscale-admin.loadbalancer.server.port: 80
-      traefik.http.services.headscale-admin.loadbalancer.server.scheme: http
-      traefik.http.routers.headscale-admin.rule: Host(`admin.example.com`) && PathPrefix(`/admin`)
-      traefik.http.routers.headscale-admin.entrypoints: websecure
-      traefik.http.routers.headscale-admin.tls.certresolver: myresolver
+	image: HybridRCG/headscale-admin:0.28.4
+	container_name: headscale-admin
+	restart: unless-stopped
+	networks:
+	  - proxy
+	labels:
+	  traefik.enable: "true"
+	  traefik.docker.network: "proxy"
+	  # Headscale Admin Service Configuration
+	  traefik.http.services.headscale-admin.loadbalancer.server.port: 80
+	  traefik.http.services.headscale-admin.loadbalancer.server.scheme: http
+	  traefik.http.routers.headscale-admin.rule: Host(`admin.example.com`) && PathPrefix(`/admin`)
+	  traefik.http.routers.headscale-admin.entrypoints: websecure
+	  traefik.http.routers.headscale-admin.tls.certresolver: myresolver
 
 networks:
   proxy:
-    external: true
+	external: true
 
 volumes:
   headscale-data:
@@ -354,6 +404,20 @@ Display all nodes with advertised routes. Provides the ability to enable and dis
 
 <img width="1000" alt="image" src="./img/HA-Routes.png">
 
+### DNS Page
+
+Manage all Headscale DNS settings directly from the UI — no config file editing required. Changes are applied immediately and Headscale is restarted automatically.
+
+- Tailnet name (base domain) — rename
+- Magic DNS — enable/disable
+- Override Local DNS — enable/disable
+- Global nameservers — add/remove
+- Split DNS nameservers — add/remove per domain
+- Search domains — add/remove
+- Extra DNS records (A/AAAA) — add/remove
+
+<img width="1000" alt="image" src="./img/HA-DNS.png">
+
 ### ACL Builder
 
 The ACL builder provides a GUI for loading, creating, modifying, and applying [headscale ACL](https://headscale.net/latest/ref/acls/) configurations.
@@ -408,3 +472,7 @@ Allows a user to save the ACL configuration to the headscale server or load a ne
 Store API URL and API Key information in the browser's LocalStorage. Set API refresh interval (how frequently users, preauth keys, nodes, and routes are updated) and toggle console debugging.
 
 <img width="1000" alt="image" src="./img/HA-Settings.png">
+
+## Original Project
+
+headscale-admin was created by [GoodiesHQ](https://github.com/GoodiesHQ/headscale-admin) and is licensed under GPL v3. This fork is not affiliated with or endorsed by the original author.

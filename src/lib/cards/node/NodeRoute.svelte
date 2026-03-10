@@ -29,7 +29,6 @@
 	const subnet = $derived(liveNode.subnetRoutes.includes(route));
 
 	// component is disabled
-        console.log("disabled check - disable:", disable, "loading:", loading, "route:", route, "isExpired:", isExpired(liveNode.expiry || ""));
 	const disabled = $derived(
 		disable || // disabled by parent
 		loading || // route status is actively being changed
