@@ -1,0 +1,93 @@
+# docker-compose.yml example for headscale + headscale-admin + headscale-config-api
+# Replace hs.example.com with your domain throughout this file.
+# This example uses Traefik as a reverse proxy with Let's Encrypt SSL.
+
+services:
+
+  headscale:
+    image: headscale/headscale:latest
+    container_name: headscale
+    restart: unless-stopped
+    command: serve
+    networks:
+      - headscale_default
+    ports:
+      - "3478:3478/udp"    # STUN
+    volumes:
+      - ./data:/var/lib/headscale
+      - ./configs/headscale:/etc/headscale
+    environment:
+      TZ: 'Your/Timezone'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.headscale.rule=Host(`hs.example.com`)"
+      - "traefik.http.routers.headscale.entrypoints=websecure"
+      - "traefik.http.routers.headscale.tls=true"
+      - "traefik.http.routers.headscale.tls.certresolver=myresolver"
+      - "traefik.http.services.headscale.loadbalancer.server.port=8080"
+
+  headscale-admin:
+    image: hybridrcg/headscale-admin:latest
+    container_name: headscale-admin
+    restart: unless-stopped
+    networks:
+      - headscale_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.headscale-admin.rule=Host(`hs.example.com`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.headscale-admin.entrypoints=websecure"
+      - "traefik.http.routers.headscale-admin.tls=true"
+      - "traefik.http.routers.headscale-admin.tls.certresolver=myresolver"
+      - "traefik.http.services.headscale-admin.loadbalancer.server.port=80"
+
+  headscale-config-api:
+    image: headscale-config-api:latest
+    container_name: headscale-config-api
+    restart: unless-stopped
+    networks:
+      - headscale_default
+    volumes:
+      - ./configs/headscale/config.yaml:/headscale/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CONFIG_API_KEY: "change-me-to-a-secure-key"
+      CONFIG_PATH: "/headscale/config.yaml"
+      HEADSCALE_CONTAINER: "headscale"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.headscale-config-api.rule=Host(`hs.example.com`) && PathPrefix(`/config-api`)"
+      - "traefik.http.routers.headscale-config-api.entrypoints=websecure"
+      - "traefik.http.routers.headscale-config-api.tls=true"
+      - "traefik.http.routers.headscale-config-api.tls.certresolver=myresolver"
+      - "traefik.http.routers.headscale-config-api.middlewares=config-api-strip"
+      - "traefik.http.middlewares.config-api-strip.stripprefix.prefixes=/config-api"
+      - "traefik.http.services.headscale-config-api.loadbalancer.server.port=8000"
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - headscale_default
+
+networks:
+  headscale_default:
+    driver: bridge
