@@ -1,3 +1,4 @@
+import { convertSnakeToCamel } from './converter';
 import { App } from '$lib/States.svelte';
 import { ApiAuthErrorUnauthorized } from '../errors';
 import { debug } from '../debug';
@@ -43,7 +44,7 @@ async function toApiResponse<T>(response: Response): Promise<T> {
 		throw new Error(data.message);
 	}
 
-	return data as T;
+	return convertSnakeToCamel(data) as T;
 }
 
 function headers(): { headers: HeadersInit } {
