@@ -22,7 +22,6 @@ async function toApiResponse<T>(response: Response): Promise<T> {
 		if (text === 'Unauthorized') {
 			throw new ApiAuthErrorUnauthorized();
 		}
-
 		try{
 			const data = JSON.parse(text)
 			if (isApiError(data)) {
@@ -33,17 +32,13 @@ async function toApiResponse<T>(response: Response): Promise<T> {
 				throw e
 			}
 		}
-
-
 		// unspecified errors
 		throw new Error('Unspecified Error: ' + text);
 	}
-
 	const data = await response.json();
 	if (isApiError(data)) {
 		throw new Error(data.message);
 	}
-
 	return convertSnakeToCamel(data) as T;
 }
 

@@ -185,16 +185,19 @@ export class HeadscaleAdmin {
         return false
     }
 
-    async populateNodes(nodes?: Node[]): Promise<boolean> {
-        if (nodes === undefined) {
-            nodes = await getNodes()
-        }
-        if(!arraysEqual(this.nodes.value, nodes)){
-            this.nodes.value = nodes
-            return true
-        }
-        return false
-    }
+	async populateNodes(nodes?: Node[]): Promise<boolean> {
+		if (nodes === undefined) {
+			nodes = await getNodes()
+			console.log('DEBUG populateNodes: received from getNodes():', nodes);
+		}
+		console.log('DEBUG populateNodes: checking if arrays equal, current =', this.nodes.value, 'new =', nodes);
+		if(!arraysEqual(this.nodes.value, nodes)){
+			console.log('DEBUG populateNodes: arrays not equal, setting nodes');
+			this.nodes.value = nodes
+			return true
+		}
+		return false
+	}
 
     /*
     async populateRoutes(routes?: Route[]): Promise<boolean> {

@@ -3,6 +3,8 @@ function toCamelCase(str: string): string {
 }
 
 export function convertSnakeToCamel(obj: any): any {
+	console.log('DEBUG converter: called with:', typeof obj, Array.isArray(obj) ? 'array' : 'object');
+	
 	if (obj === null || obj === undefined) return obj;
 	
 	if (Array.isArray(obj)) {
