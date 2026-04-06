@@ -18,9 +18,7 @@
 		node = $bindable(),
 	}: NodeTagsProps = $props()
 
-	const tagsForced = $derived((node.forcedTags ?? []).map((tag) => tag.replace('tag:', '')));
-	const tagsValid = $derived((node.validTags ?? []).map((tag) => tag.replace('tag:', '')));
-	const tagsInvalid = $derived((node.invalidTags ?? []).map((tag) => tag.replace('tag:', '')));
+	const tags = $derived((node.tags ?? []).map((tag) => tag.replace("tag:", "")));
 
 	let disabled = $state(false);
 	let popupInvalidTagsShow = $state(false);
@@ -79,9 +77,9 @@
 <div class="space-y-4">
 	<CardListEntry top title="Tags:">
 		<InputChip
-			name="tags-forced-node-{node.id}"
+			name="tags-node-{node.id}"
 			{disabled}
-			value={tagsForced}
+			value={tags}
 			class="w-full"
 			chips="variant-filled-success"
 			on:add={saveTags}

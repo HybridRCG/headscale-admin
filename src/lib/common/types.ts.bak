@@ -139,8 +139,10 @@ export type Node = {
 	registerMethod:
 	| 'REGISTER_METHOD_UNSPECIFIED'
 	| 'REGISTER_METHOD_AUTH_KEY'
+	| 'REGISTER_METHOD_CLI'
 	| 'REGISTER_METHOD_OIDC';
 	tags: string[];
+	validTags: string[];
 	givenName: string;
 	online: boolean;
 	approvedRoutes: string[];
