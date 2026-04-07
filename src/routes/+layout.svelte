@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Navigation from '$lib/Navigation.svelte';
 	import RawMdiGithub from '~icons/mdi/github';
+	import RawMdiLogout from '~icons/mdi/logout';
 	import '../app.postcss';
 	import {
 		AppBar,
@@ -13,54 +14,48 @@
 		initializeStores,
 		type DrawerSettings,
 	} from '@skeletonlabs/skeleton';
-
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-
 	initializeStores();
-
 	const DrawerStore = getDrawerStore();
-
 	let drawerSettings = $state({
 		id: 'navDrawer',
 		position: 'left',
 		width: 'w-64',
 		padding: '',
 	}) as DrawerSettings;
-
 	// Highlight JS
 	import hljs from 'highlight.js';
 	import 'highlight.js/styles/github-dark.css';
 	import { storeHighlightJs } from '@skeletonlabs/skeleton';
 	storeHighlightJs.set(hljs);
-
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-
 	import PageDrawer from '$lib/page/PageDrawer.svelte';
 	import { fade } from 'svelte/transition';
 	import { createPopulateErrorHandler } from '$lib/common/errors';
 	import { version } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
 	import { setTheme } from '$lib/common/themes';
-
 	let { children } = $props()
-
 	let ToastStore = $state(getToastStore());
-
+	
+	function handleLogout() {
+		localStorage.clear();
+		goto(`${base}/auth/login`);
+	}
+	
 	onMount(() => {
 		setTheme(App.theme.value || 'skeleton')
 		App.populateAll(createPopulateErrorHandler(ToastStore), true)
-
 		if (!App.hasValidApi) {
 			goto(`${base}/settings`);
 		}
 	});
 </script>
-
 <Toast />
 <PageDrawer />
 <Modal />
@@ -89,10 +84,17 @@
 					<span class="text-sm lowercase">{version}</span>
 				</div>
 			</svelte:fragment>
-
 			<svelte:fragment slot="trail">
 				<LightSwitch />
-				<a
+				<button
+					class="btn btn-sm variant-ghost-surface"
+					onclick={handleLogout}
+					title="Logout"
+				>
+					<RawMdiLogout class="mr-2" />
+					Logout
+				</button>
+				
 					class="btn btn-sm variant-ghost-surface"
 					href="https://github.com/HybridRCG/headscale-admin"
 					target="_blank"
