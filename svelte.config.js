@@ -13,6 +13,9 @@ const config = {
 		csrf: {
 			checkOrigin: false,
 		},
+		paths: {
+			base: '/admin',
+		},
 	}
 };
 
