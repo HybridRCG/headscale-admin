@@ -33,15 +33,27 @@ export const actions = {
 			const aclRes = await fetch(`${HEADSCALE_API_URL}/api/v1/policy`, {
 				headers: { Authorization: `Bearer ${HEADSCALE_API_KEY}` }
 			});
-			const aclData = await aclRes.json();
+			const aclResponse = await aclRes.json();
 			console.log('[AUTH] ACL policy fetched');
+
+			// Parse the policy string (it's a JSON string, not an object!)
+			let aclData: any = {};
+			if (aclResponse.policy) {
+				aclData = JSON.parse(aclResponse.policy);
+			} else {
+				aclData = aclResponse;
+			}
 
 			// Determine role based on groups
 			let role = 'viewer';
 			const groups = aclData.groups || {};
 
+			console.log('[AUTH] Groups available:', Object.keys(groups));
+			console.log('[AUTH] Checking email:', email);
+
 			for (const [groupName, members] of Object.entries(groups)) {
 				if ((members as string[]).includes(email)) {
+					console.log('[AUTH] Found in group:', groupName);
 					if (groupName === 'group:admin') {
 						role = 'admin';
 						break;
