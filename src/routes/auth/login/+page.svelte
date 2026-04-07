@@ -20,7 +20,7 @@
 							success = true;
 							localStorage.setItem('userRole', result.data.user.role);
 							localStorage.setItem('userName', result.data.user.name);
-							setTimeout(() => window.location.href = '/admin/', 500);
+							setTimeout(() => window.location.href = '/admin/nodes', 500);
 						} else if (result.type === 'failure') {
 							error = result.data.error || 'Login failed';
 						} else if (result.type === 'error') {
