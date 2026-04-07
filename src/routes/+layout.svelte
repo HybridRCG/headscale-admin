@@ -26,6 +26,7 @@
 	import { setTheme } from '$lib/common/themes';
 	let { children } = $props();
 	let ToastStore = $state(getToastStore());
+	let dataLoaded = $state(false);
 	function handleLogout() {
 		authStore.logout();
 		goto(`${base}/auth/login`);
@@ -35,6 +36,8 @@
 		App.populateAll(createPopulateErrorHandler(ToastStore), true);
 		if (!App.hasValidApi) {
 			goto(`${base}/settings`);
+		} else {
+			dataLoaded = true;
 		}
 	});
 </script>
@@ -77,6 +80,14 @@
 		<Navigation />
 	</svelte:fragment>
 	<div class="pl-2 h-full" transition:fade|local>
-		{@render children()}
+		{#if dataLoaded}
+			{@render children()}
+		{:else}
+			<div class="flex items-center justify-center h-full">
+				<div class="text-center">
+					<div class="text-lg">Loading dashboard...</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 </AppShell>
