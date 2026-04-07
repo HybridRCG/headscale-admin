@@ -3,35 +3,17 @@
 	import RawMdiGithub from '~icons/mdi/github';
 	import RawMdiLogout from '~icons/mdi/logout';
 	import '../app.postcss';
-	import {
-		AppBar,
-		AppShell,
-		LightSwitch,
-		Modal,
-		Toast,
-		getDrawerStore,
-		getToastStore,
-		initializeStores,
-		type DrawerSettings,
-	} from '@skeletonlabs/skeleton';
+	import { AppBar, AppShell, LightSwitch, Modal, Toast, getDrawerStore, getToastStore, initializeStores, type DrawerSettings } from '@skeletonlabs/skeleton';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth';
-	
 	initializeStores();
 	const DrawerStore = getDrawerStore();
-	let drawerSettings = $state({
-		id: 'navDrawer',
-		position: 'left',
-		width: 'w-64',
-		padding: '',
-	}) as DrawerSettings;
-	// Highlight JS
+	let drawerSettings = $state({ id: 'navDrawer', position: 'left', width: 'w-64', padding: '' }) as DrawerSettings;
 	import hljs from 'highlight.js';
 	import 'highlight.js/styles/github-dark.css';
 	import { storeHighlightJs } from '@skeletonlabs/skeleton';
 	storeHighlightJs.set(hljs);
-	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
@@ -42,18 +24,15 @@
 	import { version } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
 	import { setTheme } from '$lib/common/themes';
-	
-	let { children } = $props()
+	let { children } = $props();
 	let ToastStore = $state(getToastStore());
-	
 	function handleLogout() {
 		authStore.logout();
 		goto(`${base}/auth/login`);
 	}
-	
 	onMount(() => {
-		setTheme(App.theme.value || 'skeleton')
-		App.populateAll(createPopulateErrorHandler(ToastStore), true)
+		setTheme(App.theme.value || 'skeleton');
+		App.populateAll(createPopulateErrorHandler(ToastStore), true);
 		if (!App.hasValidApi) {
 			goto(`${base}/settings`);
 		}
@@ -64,24 +43,15 @@
 <Modal />
 <AppShell slotSidebarLeft="w-0 mr-2 lg:w-48" scrollGutter="stable both-edges">
 	<svelte:fragment slot="header">
-		<!-- App Bar -->
 		<AppBar>
 			<svelte:fragment slot="lead">
 				<div>
-					<button
-						aria-label="open navigation panel"
-						class="lg:hidden btn btn-sm mr-4"
-						onclick={() => {
-							DrawerStore.open(drawerSettings);
-						}}
-					>
-						<span>
-							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
-								<rect width="100" height="20" />
-								<rect y="30" width="100" height="20" />
-								<rect y="60" width="100" height="20" />
-							</svg>
-						</span>
+					<button aria-label="open navigation panel" class="lg:hidden btn btn-sm mr-4" onclick={() => DrawerStore.open(drawerSettings)}>
+						<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
+							<rect width="100" height="20" />
+							<rect y="30" width="100" height="20" />
+							<rect y="60" width="100" height="20" />
+						</svg>
 					</button>
 					<strong class="text-xl uppercase">Headscale-Admin</strong>
 					<span class="text-sm lowercase">{version}</span>
@@ -90,24 +60,13 @@
 			<svelte:fragment slot="trail">
 				<LightSwitch />
 				{#if $authStore}
-					<span class="text-sm text-slate-400 mr-4">
-						{$authStore.name} ({$authStore.role})
-					</span>
-					<button
-						class="btn btn-sm variant-ghost-surface"
-						onclick={handleLogout}
-						title="Logout"
-					>
+					<span class="text-sm text-slate-400 mr-4">{$authStore.name} ({$authStore.role})</span>
+					<button class="btn btn-sm variant-ghost-surface" onclick={handleLogout} title="Logout">
 						<RawMdiLogout class="mr-2" />
 						Logout
 					</button>
 				{/if}
-				
-					class="btn btn-sm variant-ghost-surface"
-					href="https://github.com/HybridRCG/headscale-admin"
-					target="_blank"
-					rel="noreferrer"
-				>
+				<a class="btn btn-sm variant-ghost-surface" href="https://github.com/HybridRCG/headscale-admin" target="_blank" rel="noreferrer">
 					<RawMdiGithub class="mr-2" />
 					GitHub
 				</a>
