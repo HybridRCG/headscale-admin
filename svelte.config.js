@@ -14,7 +14,8 @@ const config = {
 		},
 		prerender: {
 			crawl: false,
-			entries: []
+			entries: [],
+			handleUnseenRoutes: 'ignore'
 		}
 	}
 };
