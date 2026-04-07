@@ -42,6 +42,7 @@
 	import { version } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
 	import { setTheme } from '$lib/common/themes';
+	
 	let { children } = $props()
 	let ToastStore = $state(getToastStore());
 	
@@ -92,21 +93,22 @@
 					<span class="text-sm text-slate-400 mr-4">
 						{$authStore.name} ({$authStore.role})
 					</span>
+					<button
+						class="btn btn-sm variant-ghost-surface"
+						onclick={handleLogout}
+						title="Logout"
+					>
+						<RawMdiLogout class="mr-2" />
+						Logout
+					</button>
 				{/if}
-				<button
-					class="btn btn-sm variant-ghost-surface"
-					onclick={handleLogout}
-					title="Logout"
-				>
-					<RawMdiLogout class="mr-2" />
-					Logout
-				</button>
-				<a
+				
 					class="btn btn-sm variant-ghost-surface"
 					href="https://github.com/HybridRCG/headscale-admin"
 					target="_blank"
 					rel="noreferrer"
 				>
+					<RawMdiGithub class="mr-2" />
 					GitHub
 				</a>
 			</svelte:fragment>
