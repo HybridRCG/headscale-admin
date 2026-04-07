@@ -10,14 +10,18 @@ export interface AuthUser {
 function createAuthStore() {
 	let initialUser: AuthUser | null = null;
 
-	// Only read localStorage on the client
+	// Load from localStorage on the client
 	if (browser) {
-		const email = localStorage.getItem('userEmail');
-		const name = localStorage.getItem('userName');
-		const role = localStorage.getItem('userRole') as any;
+		try {
+			const email = localStorage.getItem('userEmail');
+			const name = localStorage.getItem('userName');
+			const role = localStorage.getItem('userRole') as any;
 
-		if (email && name && role) {
-			initialUser = { email, name, role };
+			if (email && name && role) {
+				initialUser = { email, name, role };
+			}
+		} catch (e) {
+			console.error('Error loading auth from localStorage:', e);
 		}
 	}
 
@@ -27,19 +31,36 @@ function createAuthStore() {
 		subscribe,
 		login: (user: AuthUser) => {
 			if (browser) {
-				localStorage.setItem('userEmail', user.email);
-				localStorage.setItem('userName', user.name);
-				localStorage.setItem('userRole', user.role);
+				try {
+					localStorage.setItem('userEmail', user.email);
+					localStorage.setItem('userName', user.name);
+					localStorage.setItem('userRole', user.role);
+				} catch (e) {
+					console.error('Error saving auth to localStorage:', e);
+				}
 			}
 			set(user);
 		},
 		logout: () => {
 			if (browser) {
-				localStorage.removeItem('userEmail');
-				localStorage.removeItem('userName');
-				localStorage.removeItem('userRole');
+				try {
+					localStorage.removeItem('userEmail');
+					localStorage.removeItem('userName');
+					localStorage.removeItem('userRole');
+					localStorage.removeItem('apiKey');
+					localStorage.removeItem('apiUrl');
+				} catch (e) {
+					console.error('Error clearing localStorage:', e);
+				}
 			}
 			set(null);
+		},
+		isLoggedIn: () => {
+			let loggedIn = false;
+			subscribe((user) => {
+				loggedIn = !!user;
+			})();
+			return loggedIn;
 		}
 	};
 }
