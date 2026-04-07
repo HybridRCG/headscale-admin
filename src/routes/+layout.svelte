@@ -16,6 +16,8 @@
 	} from '@skeletonlabs/skeleton';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import { authStore } from '$lib/stores/auth';
+	
 	initializeStores();
 	const DrawerStore = getDrawerStore();
 	let drawerSettings = $state({
@@ -44,7 +46,7 @@
 	let ToastStore = $state(getToastStore());
 	
 	function handleLogout() {
-		localStorage.clear();
+		authStore.logout();
 		goto(`${base}/auth/login`);
 	}
 	
@@ -86,6 +88,11 @@
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<LightSwitch />
+				{#if $authStore}
+					<span class="text-sm text-slate-400 mr-4">
+						{$authStore.name} ({$authStore.role})
+					</span>
+				{/if}
 				<button
 					class="btn btn-sm variant-ghost-surface"
 					onclick={handleLogout}
