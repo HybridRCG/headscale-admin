@@ -17,6 +17,7 @@
     "@skeletonlabs/skeleton": "^2.11.0",
     "@skeletonlabs/tw-plugin": "^0.4.1",
     "@sveltejs/adapter-auto": "^4.0.0",
+    "@sveltejs/adapter-node": "^5.5.4",
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.53.4",
     "@sveltejs/vite-plugin-svelte": "^5.1.1",
