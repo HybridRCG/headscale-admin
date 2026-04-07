@@ -101,13 +101,12 @@
 					<RawMdiLogout class="mr-2" />
 					Logout
 				</button>
-				
+				<a
 					class="btn btn-sm variant-ghost-surface"
 					href="https://github.com/HybridRCG/headscale-admin"
 					target="_blank"
 					rel="noreferrer"
 				>
-					<RawMdiGithub class="mr-2" />
 					GitHub
 				</a>
 			</svelte:fragment>
