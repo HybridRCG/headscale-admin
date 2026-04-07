@@ -20,7 +20,7 @@
 							success = true;
 							localStorage.setItem('userRole', result.data.user.role);
 							localStorage.setItem('userName', result.data.user.name);
-							setTimeout(() => window.location.href = '/', 500);
+							setTimeout(() => window.location.href = '/admin/', 500);
 						} else if (result.type === 'failure') {
 							error = result.data.error || 'Login failed';
 						} else if (result.type === 'error') {
@@ -62,7 +62,7 @@
 			{:else}
 				<div class="text-center">
 					<div class="text-green-600 text-lg font-semibold mb-4">✓ Login successful!</div>
-					<p class="text-slate-600">Redirecting...</p>
+					<p class="text-slate-600">Redirecting to dashboard...</p>
 				</div>
 			{/if}
 
