@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 
 export interface AuthUser {
 	email: string;
@@ -9,7 +10,8 @@ export interface AuthUser {
 function createAuthStore() {
 	let initialUser: AuthUser | null = null;
 
-	if (typeof window !== 'undefined') {
+	// Only read localStorage on the client
+	if (browser) {
 		const email = localStorage.getItem('userEmail');
 		const name = localStorage.getItem('userName');
 		const role = localStorage.getItem('userRole') as any;
@@ -24,15 +26,19 @@ function createAuthStore() {
 	return {
 		subscribe,
 		login: (user: AuthUser) => {
-			localStorage.setItem('userEmail', user.email);
-			localStorage.setItem('userName', user.name);
-			localStorage.setItem('userRole', user.role);
+			if (browser) {
+				localStorage.setItem('userEmail', user.email);
+				localStorage.setItem('userName', user.name);
+				localStorage.setItem('userRole', user.role);
+			}
 			set(user);
 		},
 		logout: () => {
-			localStorage.removeItem('userEmail');
-			localStorage.removeItem('userName');
-			localStorage.removeItem('userRole');
+			if (browser) {
+				localStorage.removeItem('userEmail');
+				localStorage.removeItem('userName');
+				localStorage.removeItem('userRole');
+			}
 			set(null);
 		}
 	};
