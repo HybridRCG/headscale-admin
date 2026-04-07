@@ -1,14 +1,8 @@
 <script lang="ts">
-	import { InputChip, getToastStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
-
+	import { InputChip, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { Node } from '$lib/common/types';
-	import { setNodeTags } from '$lib/common/api';
-	import { toastError } from '$lib/common/funcs';
 	import CardListEntry from '../CardListEntry.svelte';
-
 	import RawMdiWarning from '~icons/mdi/warning-outline';
-
-	import { App } from '$lib/States.svelte';
 
 	type NodeTagsProps = {
 		node: Node,
@@ -18,96 +12,39 @@
 		node = $bindable(),
 	}: NodeTagsProps = $props()
 
+	// Display tags without the "tag:" prefix
 	const tags = $derived((node.tags ?? []).map((tag) => tag.replace("tag:", "")));
-
-	let disabled = $state(false);
-	let popupInvalidTagsShow = $state(false);
-
 	const popupInfo: PopupSettings = {
 		event: 'hover',
-		target: 'popupInvalidTags',
+		target: 'popupTagsInfo',
 		placement: 'top',
 	};
-
-	const ToastStore = getToastStore();
-
-	async function saveTags() {
-		disabled = true;
-		try {
-			const n = await setNodeTags(node, tagsForced);
-			n.validTags = [...tagsValid];
-			n.invalidTags = [...tagsInvalid];
-			App.updateValue(App.nodes, n);
-		} catch (e) {
-			toastError('Invalid Tags: ' + e, ToastStore);
-		} finally {
-			disabled = false;
-		}
-	}
-
-	let timerInfo: ReturnType<typeof setTimeout>;
-
-	function handleMouseEnter() {
-		timerInfo = setTimeout(() => {
-			popupInvalidTagsShow = true;
-		}, 333);
-	}
-
-	function handleMouseLeave() {
-		popupInvalidTagsShow = false;
-		clearTimeout(timerInfo);
-	}
 </script>
-
-<div
-	class="card p-3 rounded-md variant-filled-warning {popupInvalidTagsShow ? '' : 'invisible'}"
-	data-popup="popupInvalidTags"
->
-	<p>The following tags have been prevented by the current ACL:</p>
-	<p class="space-y-2 mt-2 text-left">
-		{#if popupInvalidTagsShow == true}
-			{#each tagsInvalid as tag}
-				<button type="button" class="chip variant-filled-error mr-2">{tag}</button>
-			{/each}
-		{/if}
-	</p>
-	<div class="arrow variant-filled-warning"></div>
-</div>
 
 <div class="space-y-4">
 	<CardListEntry top title="Tags:">
-		<InputChip
-			name="tags-node-{node.id}"
-			{disabled}
-			value={tags}
-			class="w-full"
-			chips="variant-filled-success"
-			on:add={saveTags}
-			on:remove={saveTags}
-		/>
+		<div class="space-x-2 space-y-1">
+			{#if tags.length > 0}
+				{#each tags as tag}
+					<button type="button" class="chip variant-filled-success">{tag}</button>
+				{/each}
+			{:else}
+				<span class="text-surface-400 italic">No tags assigned</span>
+			{/if}
+		</div>
 	</CardListEntry>
 	<CardListEntry top>
-		{#snippet childTitle()}
 		<span class="flex flex-row items-center">
 			Advertised Tags:
-			{#if tagsInvalid.length > 0}
-				<button
-					class="btn ml-2 btn-icon w-6 h-6 [&>*]:pointer-events-none"
-					use:popup={popupInfo}
-					onmouseenter={handleMouseEnter}
-					onmouseleave={handleMouseLeave}
-				>
-					<span class="text-warning-500">
-						<RawMdiWarning />
-					</span>
-				</button>
-			{/if}
 		</span>
-		{/snippet}
 		<div class="space-x-2 space-y-1">
-			{#each tagsValid as tag}
-				<button type="button" class="chip variant-filled-success">{tag}</button>
-			{/each}
+			{#if tags.length > 0}
+				{#each tags as tag}
+					<button type="button" class="chip variant-filled-success">{tag}</button>
+				{/each}
+			{:else}
+				<span class="text-surface-400 italic">No tags advertised</span>
+			{/if}
 		</div>
 	</CardListEntry>
 </div>
