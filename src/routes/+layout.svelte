@@ -7,6 +7,7 @@
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth';
+	import { browser } from '$app/environment';
 	initializeStores();
 	const DrawerStore = getDrawerStore();
 	let drawerSettings = $state({ id: 'navDrawer', position: 'left', width: 'w-64', padding: '' }) as DrawerSettings;
@@ -26,19 +27,23 @@
 	import { setTheme } from '$lib/common/themes';
 	let { children } = $props();
 	let ToastStore = $state(getToastStore());
-	let dataLoaded = $state(false);
 	function handleLogout() {
 		authStore.logout();
 		goto(`${base}/auth/login`);
 	}
 	onMount(() => {
+		if (browser) {
+			const apiKey = localStorage.getItem('apiKey');
+			const apiUrl = localStorage.getItem('apiUrl');
+			if (apiKey) {
+				App.apiKey.value = apiKey;
+			}
+			if (apiUrl) {
+				App.apiUrl.value = apiUrl;
+			}
+		}
 		setTheme(App.theme.value || 'skeleton');
 		App.populateAll(createPopulateErrorHandler(ToastStore), true);
-		if (!App.hasValidApi) {
-			goto(`${base}/settings`);
-		} else {
-			dataLoaded = true;
-		}
 	});
 </script>
 <Toast />
@@ -80,14 +85,6 @@
 		<Navigation />
 	</svelte:fragment>
 	<div class="pl-2 h-full" transition:fade|local>
-		{#if dataLoaded}
-			{@render children()}
-		{:else}
-			<div class="flex items-center justify-center h-full">
-				<div class="text-center">
-					<div class="text-lg">Loading dashboard...</div>
-				</div>
-			</div>
-		{/if}
+		{@render children()}
 	</div>
 </AppShell>
