@@ -21,6 +21,8 @@
 							localStorage.setItem('userEmail', result.data.user.email);
 							localStorage.setItem('userName', result.data.user.name);
 							localStorage.setItem('userRole', result.data.user.role);
+							localStorage.setItem('apiKey', result.data.apiKey);
+							localStorage.setItem('apiUrl', 'https://hs.groblers.co.uk');
 							setTimeout(() => window.location.href = '/admin/', 500);
 						} else if (result.type === 'failure') {
 							error = result.data.error || 'Login failed';

@@ -67,7 +67,8 @@ export const actions = {
 
 			return {
 				success: true,
-				user: { email, name: user.name, role }
+				user: { email, name: user.name, role },
+				apiKey: HEADSCALE_API_KEY
 			};
 		} catch (error) {
 			console.error('[AUTH] Error:', error);
