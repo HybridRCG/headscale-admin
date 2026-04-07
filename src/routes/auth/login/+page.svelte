@@ -18,9 +18,10 @@
 					return async ({ result }) => {
 						if (result.type === 'success') {
 							success = true;
-							localStorage.setItem('userRole', result.data.user.role);
+							localStorage.setItem('userEmail', result.data.user.email);
 							localStorage.setItem('userName', result.data.user.name);
-							setTimeout(() => window.location.href = '/admin/nodes', 500);
+							localStorage.setItem('userRole', result.data.user.role);
+							setTimeout(() => window.location.href = '/admin/', 500);
 						} else if (result.type === 'failure') {
 							error = result.data.error || 'Login failed';
 						} else if (result.type === 'error') {
