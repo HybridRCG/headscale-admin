@@ -33,13 +33,24 @@
 	}
 	onMount(() => {
 		if (browser) {
-			const apiKey = localStorage.getItem('apiKey');
-			const apiUrl = localStorage.getItem('apiUrl');
-			if (apiKey) {
-				App.apiKey.value = apiKey;
-			}
-			if (apiUrl) {
-				App.apiUrl.value = apiUrl;
+			const userRole = localStorage.getItem('userRole');
+			const userEmail = localStorage.getItem('userEmail');
+			
+			// Check if on login page
+			const isLoginPage = window.location.pathname.includes('/auth/login');
+			
+			// If NOT logged in and NOT on login page - redirect to login
+			if (!userRole || !userEmail) {
+				if (!isLoginPage) {
+					goto(`${base}/auth/login`);
+					return;
+				}
+			} else {
+				// Load API credentials if logged in
+				const apiKey = localStorage.getItem('apiKey');
+				const apiUrl = localStorage.getItem('apiUrl');
+				if (apiKey) App.apiKey.value = apiKey;
+				if (apiUrl) App.apiUrl.value = apiUrl;
 			}
 		}
 		setTheme(App.theme.value || 'skeleton');
